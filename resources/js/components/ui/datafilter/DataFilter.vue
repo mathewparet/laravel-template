@@ -45,6 +45,8 @@
         applyFilter()
     }
 
+    const findFilter = (filterName: string) => props.filters.filter(f => f.name == filterName);
+
     onMounted(() => {
         const urlObj = getCurrentUrl(props.data)
 
@@ -147,7 +149,14 @@
             </div>
             <div class="flex flex-wrap overflow-auto" v-if="numFiltersApplied">
                 <div v-for="filter in props.filters" :key="filter.name">
-                    <span v-if="form[filter.name] && filter.name != 'search'" class="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-full dark:bg-gray-700 dark:text-gray-300">{{ getFormattedFieldName(filter) }}: {{ form[filter.name] }}<Link class="ml-1" as="button" @click.prevent="removeFilter(filter)"><X class="w-3 h-3"/></Link></span>
+                    <span v-if="form[filter.name] && filter.name != 'search'" class="bg-gray-100 text-gray-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-full dark:bg-gray-700 dark:text-gray-300">
+                        {{ getFormattedFieldName(filter) }}: 
+                        {{ 
+                            findFilter(filter.name)[0].type == 6 
+                                ? findFilter(filter.name)[0].selectOptions.options.filter(f => f.value == form[filter.name])[0].label 
+                                : form[filter.name] 
+                        }}
+                        <Link class="ml-1" as="button" @click.prevent="removeFilter(filter)"><X class="w-3 h-3"/></Link></span>
                 </div>
             </div>
         </div>
