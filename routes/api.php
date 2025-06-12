@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\PurchaseOrderController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Client\Request;
 use PioneerDynamics\InertiaApiMiddleware\Providers\InertiaApiServiceProvider;
