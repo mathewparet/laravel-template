@@ -10,5 +10,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::middleware(['auth:sanctum'])->name('api.')->group(function() {
-    Route::resource('purchaseOrders', PurchaseOrderController::class);
+    
 });
