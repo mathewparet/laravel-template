@@ -12,7 +12,7 @@ Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified', '2fa'])->name('dashboard');
 
-Route::middleware(['auth', 'verified', InertiaApiMiddleware::class])->group(function() {
+Route::middleware(['auth', 'verified', '2fa', InertiaApiMiddleware::class])->group(function() {
     // 
 });
 
