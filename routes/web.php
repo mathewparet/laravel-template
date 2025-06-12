@@ -10,7 +10,7 @@ Route::get('/', function () {
 
 Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth', 'verified', '2fa'])->name('dashboard');
 
 Route::middleware(['auth', 'verified', InertiaApiMiddleware::class])->group(function() {
     // 
