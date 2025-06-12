@@ -14,6 +14,8 @@ class PasskeyController extends PioneerDynamicsPasskeyController
 {
     public function index()
     {
+        Auth::user()->load('passkeys');
+
         return Inertia::render('settings/Passkey');
     }
 
