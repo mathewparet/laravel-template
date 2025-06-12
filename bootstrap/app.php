@@ -7,6 +7,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use PioneerDynamics\InertiaApiMiddleware\Http\Middleware\InertiaApiMiddleware;
+use App\Http\Middleware\RequireTwoFactorAuthenticationWhenEnabled;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -23,6 +24,11 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
+        
+        $middleware->alias([
+            '2fa' => RequireTwoFactorAuthenticationWhenEnabled::class,
+        ]);
+
         $middleware->api(append: [
             InertiaApiMiddleware::class,
         ]);

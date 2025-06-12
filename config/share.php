@@ -10,6 +10,8 @@ return [
      */
     'configs' => [
         'app.name',
+        'app.url',
+        'app.domain',
     ],
 
     /**

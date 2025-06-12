@@ -13,6 +13,8 @@ import { renderApp, Modal, ModalLink } from '@inertiaui/modal-vue'
 axios.defaults.withCredentials = true;
 axios.defaults.withXSRFToken = true;
 
+window.axios = axios;
+
 // Extend ImportMeta interface for Vite...
 declare module 'vite/client' {
     interface ImportMetaEnv {

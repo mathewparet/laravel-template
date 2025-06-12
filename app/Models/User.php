@@ -2,21 +2,21 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use PioneerDynamics\LaravelPasskey\Traits\HasPasskeys;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use mathewparet\LaravelPolicyAbilitiesExport\Traits\ExportsPermissions;
+use PioneerDynamics\LaravelPasskey\Contracts\PasskeyUser;
 
 /**
- * @property bool $is_super_admin
+ * @property bool $is_two_factor_enabled
  */
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, ExportsPermissions;
+    use HasFactory, Notifiable, HasPasskeys;
 
     /**
      * The attributes that are mass assignable.
@@ -37,11 +37,19 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_token',
+        'backup_codes',
     ];
 
     protected $appends = [
-        'is_super_admin',
+        'is_two_factor_enabled',
     ];
+
+    public function getUserIcon()
+    {
+        return null;
+    }
+
 
     /**
      * Get the attributes that should be cast.
@@ -53,18 +61,23 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'backup_codes'=> 'encrypted:array',
+            'two_factor_token' => 'encrypted',
         ];
     }
 
-    public function isSuperAdmin(): Attribute
+    public function isTwoFactorEnabled(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->id === 1,
+            get: fn() => !blank($this->two_factor_token),
         );
     }
 
-    public function owns(Model $model): bool
+    public function disable2FA()
     {
-        return $model->user->is($this);
+        $this->forceFill([
+            'two_factor_token' => null,
+            'backup_codes' => null
+        ])->save();
     }
 }
