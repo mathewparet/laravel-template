@@ -44,8 +44,6 @@ const groupedNavItems = mainNavItems.reduce<Record<string, GroupedNavItem[]>>((a
   return acc;
 }, {});
 
-console.log(groupedNavItems)
-
 </script>
 
 <template>
