@@ -7,6 +7,8 @@ use Monolog\Processor\PsrLogMessageProcessor;
 
 return [
 
+    'before' => env('LOG_REQUESTS_UNTIL'),
+
     /*
     |--------------------------------------------------------------------------
     | Default Log Channel
