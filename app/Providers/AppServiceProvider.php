@@ -7,6 +7,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Laravel\Scout\Builder;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,11 +25,30 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->eagerLoadAllRelationships();
+
+        $this->definedRequestMacros();
     }
     
     private function eagerLoadAllRelationships()
     {
         Model::automaticallyEagerLoadRelationships();
         Model::preventLazyLoading();
+    }
+
+    private function definedRequestMacros()
+    {
+        Request::macro('requestId', function() {
+            /**
+             * @var \Illuminate\Http\Request $this
+             */
+            return $this->headers->get('Request-Id');
+        });
+        
+        Request::macro('sessionId', function() {
+            /**
+             * @var \Illuminate\Http\Request $this
+             */
+            return hash('sha256', $this->session()->getId());
+        });
     }
 }
