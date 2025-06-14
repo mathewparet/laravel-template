@@ -18,6 +18,21 @@ class AddLoggingContext
      */
     public function handle(Request $request, Closure $next): Response
     {
+        $this->defineLoggingContext($request);
+
+        $start = microtime(true);
+        
+        $response = $next($request);
+
+        $this->logRequestIfEnabled($start);
+
+        $response->headers->set('Request-Id', $request->requestId());
+
+        return $response;
+    }
+
+    private function defineLoggingContext(Request $request)
+    {
         Log::shareContext([
             'user-id' => $request->user()?->id,
             'request-id' => $requestId = Str::uuid()->toString(),
@@ -26,16 +41,6 @@ class AddLoggingContext
         ]);
 
         $request->headers->set('Request-Id', $requestId);
-
-        $start = microtime(true);
-        
-        $response = $next($request);
-
-        $this->logRequestIfEnabled($start);
-
-        $response->headers->set('Request-Id', $requestId);
-
-        return $response;
     }
 
     private function logRequestIfEnabled(string|float $start)

@@ -1,5 +1,7 @@
 <?php
 
+use App\Contracts\MaskedException;
+use App\Http\Middleware\AddLoggingContext;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
@@ -23,7 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleAppearance::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
-            // \App\Http\Middleware\AddLoggingContext::class,
+            AddLoggingContext::class,
         ]);
         
         $middleware->alias([
@@ -31,9 +33,51 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->api(append: [
+            AddLoggingContext::class,
             InertiaApiMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->render(function (Throwable $e, \Illuminate\Http\Request $request) {
+            $status = method_exists($e, 'getStatusCode') ? $e->getStatusCode() : 500;
+
+            // Only handle 4xx and 5xx errors
+            if ($status < 400) {
+                return null; // fallback to default handling
+            }
+
+            $requestId = $request->requestId();
+
+            if($e instanceof MaskedException) {
+                $message = $e->getMaskedMessage()['message'];
+                $status = $e->getMaskedMessage()['status'];
+            }
+            else {
+                $message = $e->getMessage();
+            }
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'error' => true,
+                    'message' => $message,
+                    'code' => $status,
+                    'request_id' => $requestId,
+                ], $status);
+            }
+
+            if (!url()->previous() || url()->previous() === $request->fullUrl()) {
+                return inertia('Error/Show', [
+                    'message' => $message,
+                    'code' => $status,
+                    'requestId' => $requestId,
+                ])->toResponse($request)->setStatusCode($status);
+            }
+
+            // For non-JSON (e.g. browser requests), use flash
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', $message)
+                ->with('request-id', $requestId);
+        });
     })->create();
