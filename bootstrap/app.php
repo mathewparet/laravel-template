@@ -59,6 +59,9 @@ return Application::configure(basePath: dirname(__DIR__))
                 $status = $exeption->getMaskedMessage()['status'];
             }
             else {
+                if(!app()->isProduction() && app()->hasDebugModeEnabled()) {
+                    return;
+                }
                 $message = $exeption->getMessage();
             }
 
