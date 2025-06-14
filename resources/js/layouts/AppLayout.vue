@@ -1,38 +1,42 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
 import type { BreadcrumbItemType } from '@/types';
-// import { router } from '@inertiajs/vue3'
-// import { onMounted } from 'vue';
+import { usePage } from '@inertiajs/vue3'
+import { onMounted } from 'vue';
 
 interface Props {
     breadcrumbs?: BreadcrumbItemType[];
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
     breadcrumbs: () => [],
 });
 
-// onMounted(() => {
-//     router.on('before', (event) => {
-//         const currentRouteName = route().current()
-
-//         if (!currentRouteName) return // Safety check
-
-//         const url = new URL(event.detail.visit.url, window.location.origin)
-
-//         const savedFilters = JSON.parse(localStorage.getItem('filter:' + route().current()) || '{}')
-        
-//         for (const [key, value] of Object.entries(savedFilters)) {
-//             if (!url.searchParams.has(key) && value != null && value !== '') {
-//                 url.searchParams.set(key, value)
-//             }
-//         }
-        
-//         console.log(url.toString());
-
-//         event.detail.visit.url = url
-//     })
-// })
+onMounted(() => {
+    if(usePage().props?.flash?.error) {
+        toast.error(usePage().props?.flash?.error + (usePage().props?.flash['request-id'] ? '\n\nRequest ID: ' + usePage().props?.flash['request-id'] : ''), {
+            autoClose: 6000,
+            closeOnClick: false,
+            newestOnTop: true,
+        })
+    }
+    if(usePage().props?.flash?.success) {
+        toast.success(usePage().props?.flash?.error + (usePage().props?.flash['request-id'] ? '\n\nRequest ID: ' + usePage().props?.flash['request-id'] : ''), {
+            autoClose: 6000,
+            closeOnClick: false,
+            newestOnTop: true,
+        })
+    }
+    if(usePage().props?.flash?.info) {
+        toast.info(usePage().props?.flash?.error + (usePage().props?.flash['request-id'] ? '\n\nRequest ID: ' + usePage().props?.flash['request-id'] : ''), {
+            autoClose: 6000,
+            closeOnClick: false,
+            newestOnTop: true,
+        })
+    }
+})
 
 </script>
 
