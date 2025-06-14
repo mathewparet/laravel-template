@@ -10,6 +10,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use PioneerDynamics\InertiaApiMiddleware\Http\Middleware\InertiaApiMiddleware;
 use App\Http\Middleware\RequireTwoFactorAuthenticationWhenEnabled;
+use Illuminate\Auth\AuthenticationException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -39,10 +40,15 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (Throwable $e, \Illuminate\Http\Request $request) {
-            $status = method_exists($e, 'getStatusCode') ? $e->getStatusCode() : 500;
+            
+            if ($e instanceof AuthenticationException) {
+                return null;
+            }
+
+            $status = method_exists($e, 'getStatusCode') ? $e->getStatusCode() : null;
 
             // Only handle 4xx and 5xx errors
-            if ($status < 400) {
+            if (!$status || $status < 500) {
                 return null; // fallback to default handling
             }
 
