@@ -39,27 +39,27 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        $exceptions->render(function (Throwable $e, \Illuminate\Http\Request $request) {
+        $exceptions->render(function (Throwable $exeption, \Illuminate\Http\Request $request) {
             
-            if ($e instanceof AuthenticationException) {
+            if ($exeption instanceof AuthenticationException) {
                 return null;
             }
 
-            $status = method_exists($e, 'getStatusCode') ? $e->getStatusCode() : null;
+            $status = method_exists($exeption, 'getStatusCode') ? $exeption->getStatusCode() : null;
 
             // Only handle 4xx and 5xx errors
-            if (!$status || $status < 500) {
+            if ((!$status || $status < 400) && !$exeption instanceof MaskedException) {
                 return null; // fallback to default handling
             }
 
             $requestId = $request->requestId();
 
-            if($e instanceof MaskedException) {
-                $message = $e->getMaskedMessage()['message'];
-                $status = $e->getMaskedMessage()['status'];
+            if($exeption instanceof MaskedException) {
+                $message = $exeption->getMaskedMessage()['message'];
+                $status = $exeption->getMaskedMessage()['status'];
             }
             else {
-                $message = $e->getMessage();
+                $message = $exeption->getMessage();
             }
 
             if ($request->expectsJson()) {
@@ -71,7 +71,13 @@ return Application::configure(basePath: dirname(__DIR__))
                 ], $status);
             }
 
-            if (!url()->previous() || url()->previous() === $request->fullUrl()) {
+            if (
+                    (
+                        !$request->headers->has('referer') 
+                        || !str_starts_with($request->headers->get('referer'), config('app.url'))
+                    ) 
+                    && !$request->headers->has('X-Inertia')
+                ) {
                 return inertia('Error/Show', [
                     'message' => $message,
                     'code' => $status,
