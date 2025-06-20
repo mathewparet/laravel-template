@@ -22,6 +22,6 @@ return [
         'error',
         'alert',
         'success',
-        'request-id',
+        'requestId',
     ]
 ];
