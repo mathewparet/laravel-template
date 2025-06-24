@@ -34,13 +34,16 @@ const footerNavItems: NavItem[] = [
     },
 ];
 
-const navGroups: Array<string> = computed<Array<string>>(() => [...new Set(mainNavItems.map((item: GroupedNavItem) => item.group))])
+const navGroups: Array<string> = computed<Array<string>>(() => [...new Set(mainNavItems.filter((item: GroupedNavItem) => item.module ? usePage().props.modules.includes(item.module) : true).map((item: GroupedNavItem) => item.group))])
 
 const groupedNavItems = mainNavItems.reduce<Record<string, GroupedNavItem[]>>((acc, item) => {
   if (!acc[item.group]) {
     acc[item.group] = [];
   }
-  acc[item.group].push(item);
+
+  if(item.module ? usePage().props.modules.includes(item.module) : true) {
+      acc[item.group].push(item);
+  }
   return acc;
 }, {});
 

@@ -20,11 +20,11 @@ class AddLoggingContext
     {
         $this->defineLoggingContext($request);
 
-        $start = microtime(true);
+        $start = $this->captureExecutionStartTime();
         
         $response = $next($request);
 
-        $this->logRequestIfEnabled($start);
+        $this->logRequest($start);
 
         $response->headers->set('Request-Id', $request->requestId());
 
@@ -43,13 +43,37 @@ class AddLoggingContext
         $request->headers->set('Request-Id', $requestId);
     }
 
-    private function logRequestIfEnabled(string|float $start)
+    private function captureExecutionStartTime(): float
     {
-        $logUntil = config('logging.before') ? Carbon::parse(config('logging.before'), "Australia/Sydney") : now()->subMinute();
+        return microtime(true);
+    }
 
-        if($logUntil->isFuture()) {
-            Log::debug('Endpoint called', [
-                'duration' => round((microtime(true) - $start) * 1000)
+    private function calculateExecutionTime(string|float $start): float
+    {
+        return (microtime(true) - $start) * 1000;
+    }
+
+    private function isLongExecuting(string|float $duration): bool
+    {
+        $alert_durations_beyond = config('logging.slow_endpoint_ms');
+
+        return $alert_durations_beyond && $duration > $alert_durations_beyond;
+    }
+
+    private function getLogUntilTime(): Carbon
+    {
+        return Carbon::parse(config('logging.before'));
+    }
+
+    private function logRequest(string|float $start)
+    {
+        $logUntil = $this->getLogUntilTime();
+
+        $executionTime = $this->calculateExecutionTime($start);
+
+        if($logUntil->isFuture() || $this->isLongExecuting($executionTime)) {
+            Log::info('Endpoint called', [
+                'duration' => $executionTime
             ]);
         }
     }

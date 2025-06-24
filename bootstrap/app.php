@@ -11,6 +11,8 @@ use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use PioneerDynamics\InertiaApiMiddleware\Http\Middleware\InertiaApiMiddleware;
 use App\Http\Middleware\RequireTwoFactorAuthenticationWhenEnabled;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -45,11 +47,14 @@ return Application::configure(basePath: dirname(__DIR__))
                 return null;
             }
 
+            if ($exeption instanceof ValidationException) {
+                return null;
+            }
+
             $status = method_exists($exeption, 'getStatusCode') ? $exeption->getStatusCode() : null;
 
-            // Only handle 4xx and 5xx errors
-            if ((!$status || $status < 400) && !$exeption instanceof MaskedException) {
-                return null; // fallback to default handling
+            if($exeption instanceof HttpException && (!$status || $status < 400)) {
+                return null;
             }
 
             $requestId = $request->requestId();
@@ -62,7 +67,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 if(!app()->isProduction() && app()->hasDebugModeEnabled()) {
                     return;
                 }
-                $message = $exeption->getMessage();
+                $message = $status == 500 ? "Uh oh! It's not you, its us." : $exeption->getMessage();
             }
 
             if ($request->expectsJson()) {
@@ -70,7 +75,7 @@ return Application::configure(basePath: dirname(__DIR__))
                     'error' => true,
                     'message' => $message,
                     'code' => $status,
-                    'request_id' => $requestId,
+                    'requestId' => $requestId,
                 ], $status);
             }
 
@@ -93,6 +98,6 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->back()
                 ->withInput()
                 ->with('error', $message)
-                ->with('request-id', $requestId);
+                ->with('requestId', $requestId);
         });
     })->create();

@@ -16,21 +16,21 @@ const props = withDefaults(defineProps<Props>(), {
 
 onMounted(() => {
     if(usePage().props?.flash?.error) {
-        toast.error(usePage().props?.flash?.error + (usePage().props?.flash['request-id'] ? '\n\nRequest ID: ' + usePage().props?.flash['request-id'] : ''), {
+        toast.error(usePage().props?.flash?.error + (usePage().props?.flash?.requestId ? '\n\nRequest ID: ' + usePage().props?.flash?.requestId : ''), {
             autoClose: 6000,
             closeOnClick: false,
             newestOnTop: true,
         })
     }
     if(usePage().props?.flash?.success) {
-        toast.success(usePage().props?.flash?.error + (usePage().props?.flash['request-id'] ? '\n\nRequest ID: ' + usePage().props?.flash['request-id'] : ''), {
+        toast.success(usePage().props?.flash?.error + (usePage().props?.flash?.requestId ? '\n\nRequest ID: ' + usePage().props?.flash?.requestId : ''), {
             autoClose: 6000,
             closeOnClick: false,
             newestOnTop: true,
         })
     }
     if(usePage().props?.flash?.info) {
-        toast.info(usePage().props?.flash?.error + (usePage().props?.flash['request-id'] ? '\n\nRequest ID: ' + usePage().props?.flash['request-id'] : ''), {
+        toast.info(usePage().props?.flash?.error + (usePage().props?.flash?.requestId ? '\n\nRequest ID: ' + usePage().props?.flash?.requestId : ''), {
             autoClose: 6000,
             closeOnClick: false,
             newestOnTop: true,

@@ -7,7 +7,36 @@ use Monolog\Processor\PsrLogMessageProcessor;
 
 return [
 
+    /**
+     *-------------------------------------------------------------------------
+     * Log All Requests until
+     *-------------------------------------------------------------------------
+     * 
+     * If set, all requests are logged until this time. 
+     * 
+     * Example formats:
+     *  "2025-07-21 14:25" would mean 2:25pm on the 21st of July 2025 in UTC
+     * 
+     *  "2025-07-21 14:25 Australia/Sydney" would mean 2:25pm on the 21st of 
+     *      July 2025 in Australia/Sydney timezone
+     */
+    
     'before' => env('LOG_REQUESTS_UNTIL'),
+
+    /**
+     *--------------------------------------------------------------------------
+     * Slow Endpoint Definition
+     *--------------------------------------------------------------------------
+     * 
+     * Any request that executes more that this defined milliseconds is 
+     * considered to be slow, and will be logged anyways.
+     * 
+     * Default: 300
+     * 
+     * To turn of this feature set it to null pr empty.
+     */
+
+    'slow_endpoint_ms' => env('LOG_SLOW_ENDPOINTS_MS', 300),
 
     /*
     |--------------------------------------------------------------------------
