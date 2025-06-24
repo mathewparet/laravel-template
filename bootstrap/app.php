@@ -67,7 +67,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 if(!app()->isProduction() && app()->hasDebugModeEnabled()) {
                     return;
                 }
-                $message = $exeption->getMessage();
+                $message = $status == 500 ? "Uh oh! It's not you, its us." : $exeption->getMessage();
             }
 
             if ($request->expectsJson()) {
