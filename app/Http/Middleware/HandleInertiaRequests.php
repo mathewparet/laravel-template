@@ -10,6 +10,7 @@ use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Auth;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -63,8 +64,15 @@ class HandleInertiaRequests extends Middleware
 
     private function getUserModules(): array
     {
-        return collect(config('modules.items'))
-            ->filter(fn(string $module) => Gate::allows('viewAny', $module))
-            ->all();
+        return Cache::remember('modules.items.' . Auth::id(), now()->addMinutes(5), function() {
+                return collect(config('modules.items'))
+                    ->flatMap(fn (string $module) => collect($module::globalAbilities())
+                                    ->filter(fn($isEnabled, $ability) => $isEnabled)
+                                    ->keys()
+                                    ->map(fn($ability) => $module . '::' . $ability)
+                            )
+                    ->values()
+                    ->all();
+        });
     }
 }
