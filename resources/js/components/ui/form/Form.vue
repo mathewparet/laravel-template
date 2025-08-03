@@ -19,6 +19,8 @@
     import { Pencil, Archive, Save } from 'lucide-vue-next';
     import { ReccuranceInput } from '../reccuranceinput';
     import { getFieldTypeName, getFormattedFieldName } from '@/composables/useUtils';
+    import { Tooltip, TooltipTrigger, TooltipContent } from '../tooltip';
+    import { TooltipArrow } from 'radix-vue';
 
     const emit = defineEmits<FormEmitions>();
 
@@ -112,13 +114,18 @@
                         leave-active-class="transition ease-in-out"
                         leave-to-class="opacity-0"
                     >
-                        <p v-show="form.recentlySuccessful" class="text-sm text-neutral-600">Saved.</p>
+                        <p v-show="form.recentlySuccessful" class="text-sm text-neutral-600 bg-blue-600 text-white rounded-lg px-2 py-1">Saved.</p>
                     </Transition>
-                    <Button :disabled="form.processing || !form.isDirty" @click.prevent="save">
-                        <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
-                        <Save v-else class="h-4 w-4" />
-                        Save
-                    </Button>
+                    <div v-if="form.isDirty" class="flex items-center text-sm text-orange-500 animate-pulse">
+                        <span class="text-xl leading-none">•</span>
+                    </div>
+                    <div>
+                        <Button :disabled="form.processing || !form.isDirty" @click.prevent="save">
+                            <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
+                            <Save v-else class="h-4 w-4" />
+                            Save
+                        </Button>
+                    </div>
                 </div>
             </div>
             <div class="grid gap-4 w-full pt-10" :class="{'grid-cols-1 lg:grid-cols-2': props.cols == 2 || props.cols == undefined, 'grid-cols-1 lg:grid-cols-1': props.cols == 1, 'grid-cols-1 lg:grid-cols-3': props.cols == 3}">
@@ -197,6 +204,7 @@
                             :rows="field.textAreaOptions?.rows"
                             :readonly="isReadonly || field.readonly === true"
                             :disabled="form.processing"
+                            @keyup.ctrl.enter="save"
                             :class="{
                                 'uppercase': field.decoration == FieldDecoration.Uppercase,
                                 'lowercase': field.decoration == FieldDecoration.Lowercase,
