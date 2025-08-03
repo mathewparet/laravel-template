@@ -5,6 +5,7 @@ import 'vue3-toastify/dist/index.css';
 import type { BreadcrumbItemType } from '@/types';
 import { usePage } from '@inertiajs/vue3'
 import { onMounted } from 'vue';
+import { computed, watch } from 'vue';
 
 interface Props {
     breadcrumbs?: BreadcrumbItemType[];
@@ -14,28 +15,37 @@ const props = withDefaults(defineProps<Props>(), {
     breadcrumbs: () => [],
 });
 
+const page = usePage();
+
+// Watch the entire flash object
+const flash = computed(() => page.props.flash);
+
+watch(flash, (newFlash) => {
+    if(newFlash?.error) {
+        toast.error(newFlash?.error + (newFlash?.requestId ? '\n\nRequest ID: ' + newFlash?.requestId : ''), {
+            autoClose: 6000,
+            closeOnClick: false,
+            newestOnTop: true,
+        })
+    }
+    if(newFlash?.success) {
+        toast.success(newFlash?.error + (newFlash?.requestId ? '\n\nRequest ID: ' + newFlash?.requestId : ''), {
+            autoClose: 6000,
+            closeOnClick: false,
+            newestOnTop: true,
+        })
+    }
+    if(newFlash?.info) {
+        toast.info(newFlash?.error + (newFlash?.requestId ? '\n\nRequest ID: ' + newFlash?.requestId : ''), {
+            autoClose: 6000,
+            closeOnClick: false,
+            newestOnTop: true,
+        })
+    }
+})
+
 onMounted(() => {
-    if(usePage().props?.flash?.error) {
-        toast.error(usePage().props?.flash?.error + (usePage().props?.flash?.requestId ? '\n\nRequest ID: ' + usePage().props?.flash?.requestId : ''), {
-            autoClose: 6000,
-            closeOnClick: false,
-            newestOnTop: true,
-        })
-    }
-    if(usePage().props?.flash?.success) {
-        toast.success(usePage().props?.flash?.error + (usePage().props?.flash?.requestId ? '\n\nRequest ID: ' + usePage().props?.flash?.requestId : ''), {
-            autoClose: 6000,
-            closeOnClick: false,
-            newestOnTop: true,
-        })
-    }
-    if(usePage().props?.flash?.info) {
-        toast.info(usePage().props?.flash?.error + (usePage().props?.flash?.requestId ? '\n\nRequest ID: ' + usePage().props?.flash?.requestId : ''), {
-            autoClose: 6000,
-            closeOnClick: false,
-            newestOnTop: true,
-        })
-    }
+    
 })
 
 </script>
